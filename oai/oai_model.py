@@ -21,7 +21,7 @@ class DocumentText(BaseModel):
     topics:List[Topic]
 
 
-def query_model(question_query):
+def query_text_model(question_query):
     with open(PROMPT_FILE, 'r') as file:  
         developer_query = file.read()
     
