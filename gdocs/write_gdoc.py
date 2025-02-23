@@ -29,5 +29,12 @@ def write_all_notes():
         write_notes_for_file(lecture_transcript, f'Class Notes - {file}')
         os.remove(audio_path)
 
+def record_class_lecture():
+    class_duration = int(input('How long is class (in min): ')) #[TODO] - Input error handling
+    num_recordings = class_duration//10 #[TODO] - different way to grab num recordings
+    for i in range(num_recordings):
+       record_audio()
+    
+
 
 write_all_notes()
