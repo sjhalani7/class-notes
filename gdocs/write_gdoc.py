@@ -24,7 +24,10 @@ def write_notes_for_file(lecture_transcript: str, doc_title: str, doc_heading: s
 def write_all_notes():
     files = [f for f in os.listdir('audio_files') if os.path.isfile(os.path.join('audio_files', f))]
     for file in files:
-        lecture_transcript = query_whisper(f'audio_files/{files[0]}')
-        write_notes_for_file(lecture_transcript, 'Class Notes - 02/23/2025')
+        audio_path = f'audio_files/{file}'
+        lecture_transcript = query_whisper(audio_path)
+        write_notes_for_file(lecture_transcript, f'Class Notes - {file}')
+        os.remove(audio_path)
+
 
 write_all_notes()
