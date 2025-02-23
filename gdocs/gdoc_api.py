@@ -67,9 +67,7 @@ def create_document(creds: google.oauth2.credentials.Credentials, title: str) ->
 
 def write_doc_heading(creds:google.oauth2.credentials.Credentials, heading:str, doc_id:str) -> None:
     doc_length = get_doc_length(creds, doc_id)
-
-    # Always insert a newline before and after, so it’s its own paragraph:
-    text_to_insert = f"\n{heading}\n"
+    text_to_insert = "\n" + heading + "\n"
     insertion_index = max(doc_length - 1, 0)
 
     insert_request = {
@@ -78,9 +76,9 @@ def write_doc_heading(creds:google.oauth2.credentials.Credentials, heading:str, 
             'location': {'index': insertion_index}
         }
     }
-    # The heading text itself starts AFTER the first newline:
+
     formatting_start = insertion_index + 1
-    formatting_end   = formatting_start + len(heading)
+    formatting_end  = formatting_start + len(heading)
 
     text_style_format_request = {
         "updateTextStyle": {

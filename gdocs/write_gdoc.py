@@ -5,8 +5,8 @@ creds = get_credentials()
 
 
 def write_notes():
-    doc_id = create_document(creds, "yepp")
-    write_doc_heading(creds, "test lecture notes", doc_id)
+    doc_id = create_document(creds, "Neel Test")
+    write_doc_heading(creds, "Show Neel my flow (pause)", doc_id)
     lecture_transcript = query_whisper('bla')
     formatted_notes = query_text_model(lecture_transcript)
     print(type(formatted_notes), len(formatted_notes.topics))
