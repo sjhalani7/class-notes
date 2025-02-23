@@ -1,13 +1,15 @@
 from gdocs.gdoc_api import get_credentials, create_document, write_doc_heading, write_topic, write_subtopic_title, write_subtopic_body
 from oai.oai_model import DocumentText, Subtopic, Topic, query_text_model, query_whisper
+from oai.record_audio import record_audio
+import os
 
 creds = get_credentials()
 
 
-def write_notes():
-    doc_id = create_document(creds, "Neel Test")
-    write_doc_heading(creds, "Show Neel my flow (pause)", doc_id)
-    lecture_transcript = query_whisper('bla')
+
+def write_notes_for_file(lecture_transcript: str, doc_title: str, doc_heading: str=None):
+    doc_id = create_document(creds, doc_title)
+    write_doc_heading(creds, doc_heading if doc_heading else doc_title, doc_id)
     formatted_notes = query_text_model(lecture_transcript)
     print(type(formatted_notes), len(formatted_notes.topics))
     for topic in formatted_notes.topics:
@@ -17,4 +19,12 @@ def write_notes():
             write_subtopic_body(creds, subtopic.subtopic_body, doc_id)
         print(f'topic {topic.title}, written')
     print('DONE!!!! ')
-write_notes()
+
+
+def write_all_notes():
+    files = [f for f in os.listdir('audio_files') if os.path.isfile(os.path.join('audio_files', f))]
+    for file in files:
+        lecture_transcript = query_whisper(f'audio_files/{files[0]}')
+        write_notes_for_file(lecture_transcript, 'Class Notes - 02/23/2025')
+
+write_all_notes()
