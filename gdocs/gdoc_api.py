@@ -9,7 +9,6 @@ from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/documents"]
-DOCUMENT_ID = "1xdfadI1MO71_URrVueOtdsxU527FXW33DDiCHHKZ1dE" 
 
 def get_credentials():
     creds = None
@@ -28,8 +27,30 @@ def get_credentials():
             token.write(creds.to_json()) #save for next run
     return creds
 
+def get_doc_length(creds: google.oauth2.credentials.Credentials, doc_id: str) -> str: 
+    try:
+        service = build("docs", "v1", credentials=creds)
+        document = service.documents().get(documentId=doc_id).execute()
+        content = document.get('body', None).get('content', None)
+        if content:
+            return content[-1].get('endIndex', 1)
+        return 1 
+    except HttpError as err:
+        print("Error in getting doc length ", err)
+        raise
 
-def create_document(creds:google.oauth2.credentials.Credentials, title:str) -> str:
+def batch_update_document(creds: google.oauth2.credentials.Credentials, request_body: str, document_id: str) -> dict:
+    try:
+        service = build("docs", "v1", credentials=creds)
+        document = service.documents().batchUpdate(documentId=document_id, body=request_body).execute()
+        return document
+    except HttpError as err:
+        print(f"Error in writing to gdoc: {err}")
+        raise
+        
+
+
+def create_document(creds: google.oauth2.credentials.Credentials, title: str) -> str:
     try:
         service = build("docs", "v1", credentials=creds)
         request_body = {
@@ -41,9 +62,205 @@ def create_document(creds:google.oauth2.credentials.Credentials, title:str) -> s
         return doc_id
     except HttpError as err:
         print(err)
+        raise
 
-creds = get_credentials()
-create_document(creds, 'test2- post refactor')
 
-# def write_to_doc(creds:google.oauth2.credentials.Credentials, title:str, doc_id:str):
+def write_doc_heading(creds:google.oauth2.credentials.Credentials, heading:str, doc_id:str) -> None:
+    doc_length = get_doc_length(creds, doc_id)
+
+    # Always insert a newline before and after, so it’s its own paragraph:
+    text_to_insert = f"\n{heading}\n"
+    insertion_index = max(doc_length - 1, 0)
+
+    insert_request = {
+        'insertText': {
+            'text': text_to_insert,
+            'location': {'index': insertion_index}
+        }
+    }
+    # The heading text itself starts AFTER the first newline:
+    formatting_start = insertion_index + 1
+    formatting_end   = formatting_start + len(heading)
+
+    text_style_format_request = {
+        "updateTextStyle": {
+            'textStyle': {
+                'bold': True,
+            },
+            'fields':'bold',
+            'range':{
+                'startIndex': formatting_start,
+                'endIndex': formatting_end 
+            }
+        }
+    }
+
+    paragraph_style_format_request = {
+        'updateParagraphStyle': {
+            'paragraphStyle': {
+                'alignment': 'CENTER'
+            },
+            'range': {
+                'startIndex': formatting_start,
+                'endIndex': formatting_end 
+            },
+            'fields': 'alignment'
+        }
+    }
+
+    request_body = {
+        "requests": [
+            insert_request,
+            text_style_format_request,
+            paragraph_style_format_request
+        ]
+    }
+    batch_update_document(creds, request_body, document_id=doc_id)
+
+def write_topic(creds:google.oauth2.credentials.Credentials, topic:str, doc_id:str) -> None:
+    doc_length = get_doc_length(creds, doc_id)
+    if doc_length > 1:
+        text_to_insert = "\n" + topic + '\n'
+        insertion_index = doc_length - 1  
+        formatting_start = insertion_index + 1  
+    else:
+        text_to_insert = topic
+        insertion_index = doc_length
+        formatting_start = insertion_index
+    formatting_end = formatting_start + len(topic)
+
+    insert_request = {
+        'insertText': {
+        'text': text_to_insert,
+        "location": {'index': insertion_index}
+        }
+    }
+    
+    text_style_format_request = {
+        "updateTextStyle": {
+            'textStyle': {
+                'bold': True,
+            },
+            'fields':'bold',
+            'range':{
+                'startIndex': formatting_start,
+                'endIndex': formatting_end 
+            }
+        }
+    }
+
+    paragraph_style_format_request = {
+        'updateParagraphStyle':{
+            'paragraphStyle':{
+                'alignment': 'START',
+                'namedStyleType': 'HEADING_1'
+            },
+            'range':{
+                'startIndex': formatting_start,
+                'endIndex': formatting_end 
+            },
+            'fields':'namedStyleType,alignment'
+        }
+    }
+
+    request_body = {
+        "requests": [
+            insert_request,
+            text_style_format_request,
+            paragraph_style_format_request
+        ]
+    }
+    batch_update_document(creds, request_body, document_id=doc_id)
+
+def write_subtopic_title(creds:google.oauth2.credentials.Credentials, subtopic:str, doc_id:str) -> None:
+    doc_length = get_doc_length(creds, doc_id)
+    if doc_length > 1:
+        text_to_insert = "\n" + subtopic + "\n"
+        insertion_index = doc_length - 1  
+        formatting_start = insertion_index + 1  
+    else:
+        text_to_insert = subtopic
+        insertion_index = doc_length
+        formatting_start = insertion_index
+    formatting_end = formatting_start + len(subtopic)
+
+    insert_request = {
+        'insertText': {
+        'text': text_to_insert,
+        "location": {'index': insertion_index}
+        }
+    }
+    
+    text_style_format_request = {
+        "updateTextStyle": {
+            'textStyle': {
+                'bold': True,
+            },
+            'fields':'bold',
+            'range':{
+                'startIndex': formatting_start,
+                'endIndex': formatting_end 
+            }
+        }
+    }
+
+    paragraph_style_format_request = {
+        'updateParagraphStyle':{
+            'paragraphStyle':{
+                'namedStyleType': 'HEADING_2'
+            },
+            'range':{
+                'startIndex': formatting_start,
+                'endIndex': formatting_end 
+            },
+            'fields':'namedStyleType'
+        }
+    }
+
+    request_body = {
+        "requests": [
+            insert_request,
+            text_style_format_request,
+            paragraph_style_format_request
+        ]
+    }
+    batch_update_document(creds, request_body, document_id=doc_id)
+
+def write_subtopic_body(creds:google.oauth2.credentials.Credentials, body:str, doc_id:str) -> None:
+    for line in body:
+        doc_length = get_doc_length(creds, doc_id)
+        insertion_index = doc_length - 1 if doc_length > 1 else doc_length
+        insert_request = {
+            'insertText': {
+                'text': line + "\n",
+                'location': {'index': insertion_index}
+            }
+        }
+
+        formatting_start = insertion_index
+        formatting_end = insertion_index + len(line) + 1
+
+        create_bullets_request = {
+            "createParagraphBullets": {
+                'range': {
+                    'startIndex': formatting_start,
+                    'endIndex': formatting_end
+                },
+                'bulletPreset': 'BULLET_DISC_CIRCLE_SQUARE'
+            }
+        }
+
+        request_body = {
+            "requests": [
+                insert_request,
+                create_bullets_request
+            ]
+        }
+        batch_update_document(creds, request_body, document_id=doc_id)
+
+
+def main():
+    creds = get_credentials()
+    doc_id = create_document(creds, 'test2- post refactor')
+
     
