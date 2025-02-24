@@ -23,9 +23,14 @@ def record_audio():
         stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
 
         print('Recording...')
-        for _ in range(0, RATE // CHUNK * RECORD_SECONDS):
-            wf.writeframes(stream.read(CHUNK))
-        print('Done')
-
-        stream.close()
-        p.terminate()
+        try:
+            for _ in range(0, RATE // CHUNK * RECORD_SECONDS):
+                wf.writeframes(stream.read(CHUNK))
+            print('Done recording')
+            return True
+        except KeyboardInterrupt:
+            print("Recording stopped early by user.")
+            return False  # Recording was interrupted
+        finally:
+            stream.close()
+            p.terminate()
