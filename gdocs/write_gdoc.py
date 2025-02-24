@@ -36,5 +36,3 @@ def record_class_lecture():
        record_audio()
     
 
-
-write_all_notes()
