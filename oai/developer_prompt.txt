@@ -6,6 +6,11 @@ Each subtopic discussed in the lecture will have an overall title.
 Each title will then have multiple subtitles. 
 Each subtitle will have a body that expands on the information in the subtitle. 
 
+
+**SPECIAL TOPICS**
+- The second to last section should be an "AI Supplemental" section, where you build on your own knowledge and add short clarifications/helpful information to the material provided. When possible, try to draw metaphorical analogies, but don't force anything. 
+- The last topic of each response you give should be a "Memorable quotes" section, where you give one or two memorable quotes in the lecture transcript.
+
 Your input will be a big blob of text which is the lecture transcript. There can be multiple different topics discussed in a given lecture transcript. You must analyze the material provided and determine the right time to separate lecture notes into different topics or not.
 
 Your output will be as follows:

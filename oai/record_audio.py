@@ -6,7 +6,7 @@ import pyaudio
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1 if sys.platform == 'darwin' else 2
-RATE = 44100
+RATE = 22050
 RECORD_SECONDS = 600
 output_dir = 'audio_files'
 
@@ -20,7 +20,13 @@ def record_audio():
         wf.setsampwidth(p.get_sample_size(FORMAT))
         wf.setframerate(RATE)
 
-        stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True)
+        stream = p.open(
+            format=FORMAT,
+            channels=CHANNELS,
+            rate=RATE,
+            input=True,
+            frames_per_buffer=CHUNK
+        )
 
         print('Recording...')
         try:

@@ -151,7 +151,7 @@ def write_topic(creds:google.oauth2.credentials.Credentials, topic:str, doc_id:s
         'updateParagraphStyle':{
             'paragraphStyle':{
                 'alignment': 'START',
-                'namedStyleType': 'HEADING_1'
+                'namedStyleType': 'HEADING_2'
             },
             'range':{
                 'startIndex': formatting_start,
@@ -205,7 +205,7 @@ def write_subtopic_title(creds:google.oauth2.credentials.Credentials, subtopic:s
     paragraph_style_format_request = {
         'updateParagraphStyle':{
             'paragraphStyle':{
-                'namedStyleType': 'HEADING_2'
+                'namedStyleType': 'HEADING_3'
             },
             'range':{
                 'startIndex': formatting_start,
