@@ -3,7 +3,7 @@ import sys
 import os
 import pyaudio
 
-CHUNK = 1024
+CHUNK = 2048
 FORMAT = pyaudio.paInt16
 CHANNELS = 1 if sys.platform == 'darwin' else 2
 RATE = 22050
@@ -31,7 +31,7 @@ def record_audio():
         print('Recording...')
         try:
             for _ in range(0, RATE // CHUNK * RECORD_SECONDS):
-                wf.writeframes(stream.read(CHUNK))
+                wf.writeframes(stream.read(CHUNK, exception_on_overflow=False))
             print('Done recording')
             return True
         except KeyboardInterrupt:
